@@ -44,7 +44,7 @@ imgs_run = [[ashleft1, ashleft2], [ashright1, ashright2],
 x = -3150
 z = -9450
 ez = []
-
+Press_1 = 0
 x_a = 740
 z_a = 400
 i = 0
@@ -55,8 +55,8 @@ nig = 1
 strBefore = "D"
 strBefore2 = "D"
 filename = 'mypickle.pk'
-arr_Ash_X_Z_range = [[0, 0, 0, 0], [
-    0, 0, 0, 0], [0, 0, 0, 0]]
+f = open(filename, 'rb')
+arr_Ash_X_Z_range = pickle.load(f)
 
 game_speed = 30
 lastMove = "down"
@@ -64,6 +64,8 @@ while True:
     clock.tick(game_speed)
 
     keyState = pygame.key.get_pressed()
+    if not keyState[pygame.K_1]:
+        Press_1 = 0
     if keyState[pygame.QUIT]:
         pygame.quit()
         sys.exit()
@@ -193,6 +195,10 @@ while True:
         with open(filename, 'wb') as fi:
             # dump your data into the file
             pickle.dump(arr_Ash_X_Z_range, fi)
+    elif keyState[pygame.K_1]:
+        Press_1 += 1
+        if Press_1 < 2:
+            arr_Ash_X_Z_range.pop()
 
         # strNow = f"ash_array: {x_a},{z_a} | {x}, {z} "
         # if strNow != strBefore2:
