@@ -121,20 +121,28 @@ while True:
         for feild in range(0, len(feilds)):
             if feilds[feild][0] < (x_a + abs(x)) and feilds[feild][1] > (x_a + abs(x)) and feilds[feild][2] < (z_a + abs(z)) and feilds[feild][3] > (z_a + abs(z)):
                 InFeild = True
-                if random.randint(0, 100) == 69:
+                if random.randint(0, 60) == 42:
                     if (feild - 1)*5 + 5 <= 150:
                         pokemonNumber = random.randint(
-                            (feild-1)*5, (feild-1)*5 + 5)
+                            (feild-1)*2 + 1, (feild-1)*2 + 2)
+                        strPokNumber = "0"
+                        if pokemonNumber < 10:
+                            strPokNumber += f"0{(str(pokemonNumber))}"
+                        elif pokemonNumber < 100:
+                            strPokNumber += f"{(str(pokemonNumber))}"
+                        else:
+                            strPokNumber = str(pokemonNumber)
 
                         pokemon = pypokedex.get(
                             dex=pokemonNumber)
-                        response = requests.get(
-                            f"https://img.pokemondb.net/artwork/large/{pokemon.name}.jpg")
 
-                        file = open("pokemon.jpg", "wb")
+                        response = requests.get(
+                            f"https://www.serebii.net/pokearth/sprites/frlg/{strPokNumber}.png")
+
+                        file = open("pokemon.png", "wb")
                         file.write(response.content)
                         file.close()
-                        fp = open("pokemon.jpg", "rb")
+                        fp = open("pokemon.png", "rb")
                         im = PIL.Image.open(fp)
                         width, height = im.size
                         hw = height/width
@@ -177,20 +185,28 @@ while True:
         for feild in range(0, len(feilds)):
             if feilds[feild][0] < (x_a + abs(x)) and feilds[feild][1] > (x_a + abs(x)) and feilds[feild][2] < (z_a + abs(z)) and feilds[feild][3] > (z_a + abs(z)):
                 InFeild = True
-                if random.randint(0, 100) == 69:
+                if random.randint(0, 60) == 42:
                     if (feild - 1)*5 + 5 <= 150:
                         pokemonNumber = random.randint(
-                            (feild-1)*5, (feild-1)*5 + 5)
+                            (feild-1)*2 + 1, (feild-1)*2 + 2)
+                        strPokNumber = "0"
+                        if pokemonNumber < 10:
+                            strPokNumber += f"0{(str(pokemonNumber))}"
+                        elif pokemonNumber < 100:
+                            strPokNumber += f"{(str(pokemonNumber))}"
+                        else:
+                            strPokNumber = str(pokemonNumber)
 
                         pokemon = pypokedex.get(
                             dex=pokemonNumber)
-                        response = requests.get(
-                            f"https://img.pokemondb.net/artwork/large/{pokemon.name}.jpg")
 
-                        file = open("pokemon.jpg", "wb")
+                        response = requests.get(
+                            f"https://www.serebii.net/pokearth/sprites/frlg/{strPokNumber}.png")
+
+                        file = open("pokemon.png", "wb")
                         file.write(response.content)
                         file.close()
-                        fp = open("pokemon.jpg", "rb")
+                        fp = open("pokemon.png", "rb")
                         im = PIL.Image.open(fp)
                         width, height = im.size
                         hw = height/width
@@ -231,20 +247,28 @@ while True:
         for feild in range(0, len(feilds)):
             if feilds[feild][0] < (x_a + abs(x)) and feilds[feild][1] > (x_a + abs(x)) and feilds[feild][2] < (z_a + abs(z)) and feilds[feild][3] > (z_a + abs(z)):
                 InFeild = True
-                if random.randint(0, 100) == 69:
+                if random.randint(0, 60) == 42:
                     if (feild - 1)*5 + 5 <= 150:
                         pokemonNumber = random.randint(
-                            (feild-1)*5, (feild-1)*5 + 5)
+                            (feild-1)*2 + 1, (feild-1)*2 + 2)
+                        strPokNumber = "0"
+                        if pokemonNumber < 10:
+                            strPokNumber += f"0{(str(pokemonNumber))}"
+                        elif pokemonNumber < 100:
+                            strPokNumber += f"{(str(pokemonNumber))}"
+                        else:
+                            strPokNumber = str(pokemonNumber)
 
                         pokemon = pypokedex.get(
                             dex=pokemonNumber)
-                        response = requests.get(
-                            f"https://img.pokemondb.net/artwork/large/{pokemon.name}.jpg")
 
-                        file = open("pokemon.jpg", "wb")
+                        response = requests.get(
+                            f"https://www.serebii.net/pokearth/sprites/frlg/{strPokNumber}.png")
+
+                        file = open("pokemon.png", "wb")
                         file.write(response.content)
                         file.close()
-                        fp = open("pokemon.jpg", "rb")
+                        fp = open("pokemon.png", "rb")
                         im = PIL.Image.open(fp)
                         width, height = im.size
                         hw = height/width
@@ -285,20 +309,28 @@ while True:
         for feild in range(0, len(feilds)):
             if feilds[feild][0] < (x_a + abs(x)) and feilds[feild][1] > (x_a + abs(x)) and feilds[feild][2] < (z_a + abs(z)) and feilds[feild][3] > (z_a + abs(z)):
                 InFeild = True
-                if random.randint(0, 100) == 69:
+                if random.randint(0, 60) == 42:
                     if (feild - 1)*5 + 5 <= 150:
                         pokemonNumber = random.randint(
-                            (feild-1)*5, (feild-1)*5 + 5)
+                            (feild-1)*2 + 1, (feild-1)*2 + 2)
+                        strPokNumber = "0"
+                        if pokemonNumber < 10:
+                            strPokNumber += f"0{(str(pokemonNumber))}"
+                        elif pokemonNumber < 100:
+                            strPokNumber += f"{(str(pokemonNumber))}"
+                        else:
+                            strPokNumber = string(pokemonNumber)
 
                         pokemon = pypokedex.get(
                             dex=pokemonNumber)
-                        response = requests.get(
-                            f"https://img.pokemondb.net/artwork/large/{pokemon.name}.jpg")
 
-                        file = open("pokemon.jpg", "wb")
+                        response = requests.get(
+                            f"https://www.serebii.net/pokearth/sprites/frlg/{strPokNumber}.png")
+
+                        file = open("pokemon.png", "wb")
                         file.write(response.content)
                         file.close()
-                        fp = open("pokemon.jpg", "rb")
+                        fp = open("pokemon.png", "rb")
                         im = PIL.Image.open(fp)
                         width, height = im.size
                         hw = height/width
@@ -380,14 +412,16 @@ while True:
             # dump your data into the file
             pickle.dump(feilds, fi)
     elif keyState[pygame.K_1]:
-        print("pop barier")
         Press_1 += 1
         if Press_1 < 2:
+            print("pop barier")
+
             arr_Ash_X_Z_range.pop()
     elif keyState[pygame.K_2]:
-        print("pop feild")
         Press_12 += 1
         if Press_12 < 2:
+            print("pop feild")
+
             feilds.pop()
     pygame.event.pump()
     pygame.display.flip()
