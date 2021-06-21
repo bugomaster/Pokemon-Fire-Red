@@ -115,7 +115,7 @@ OLIVE = (128, 128, 0)
 PURPLE = (128, 0, 128)
 TEAL = (0, 128, 128)
 fights = []
-x_arrow, y_arrow = 590, 350
+x_arrow, y_arrow = 570, 350
 chose = "a"
 
 attacks = ["Sky Attack", "wambo1", "wambo2", "wambo3"]
@@ -158,8 +158,8 @@ def battle():
     if chose == "Fight":
         printText(">", BLACK, 37, x_arrow, y_arrow)
 
-        printText(attacks[0], BLACK, 28, 600, 350)
-        printText(attacks[1], BLACK, 28, 600, 400)
+        printText(attacks[0], BLACK, 28, 580, 350)
+        printText(attacks[1], BLACK, 28, 580, 400)
         printText(attacks[2], BLACK, 28, 700, 350)
         printText(attacks[3], BLACK, 28, 700, 400)
 
@@ -168,8 +168,8 @@ def battle():
     else:
         printText(">", BLACK, 37, x_arrow, y_arrow)
 
-        printText("Fight", BLACK, 37, 600, 350)
-        printText("Pokemon", BLACK, 37, 600, 400)
+        printText("Fight", BLACK, 37, 580, 350)
+        printText("Pokemon", BLACK, 37, 580, 400)
 
 
 while True:
@@ -186,10 +186,10 @@ while True:
         battle()
         sameBattle = True
     elif In_Battle and sameBattle:
-        if keyState[pygame.K_RIGHT] and x_arrow == 590 and chose == "Fight":
-            x_arrow += 100
+        if keyState[pygame.K_RIGHT] and x_arrow == 570 and chose == "Fight":
+            x_arrow += 120
         elif keyState[pygame.K_LEFT] and x_arrow == 690 and chose == "Fight":
-            x_arrow -= 100
+            x_arrow -= 120
         elif keyState[pygame.K_BACKSPACE] and chose == "Fight":
             chose = "D"
         elif keyState[pygame.K_DOWN] and y_arrow == 350:
@@ -221,7 +221,7 @@ while True:
             In_Battle = False
             sameBattle = False
             screen.blit(bg_surface, (x, z))
-
+            chose = "D"
             screen.blit(imgs_run[i][j], (x_a, z_a))
     else:
         if not keyState[pygame.K_1]:
