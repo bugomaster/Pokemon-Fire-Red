@@ -7,7 +7,6 @@ from io import BytesIO
 import tkinter as tk
 import PIL.Image
 import PIL.ImageTk
-
 import pickle
 import requests
 from PIL.Image import Image
@@ -53,6 +52,19 @@ ashright2 = pygame.transform.scale(ashright2, (50, 62))
 ashright3 = pygame.image.load('pics/ashright3.png').convert_alpha()
 ashright3 = pygame.transform.scale(ashright3, (50, 62))
 
+choose_wh = 5
+battle_Choose = pygame.image.load(
+    'pics/battle/fights.png').convert_alpha()
+battle_Choose = pygame.transform.scale(
+    battle_Choose, (600, int(600/choose_wh)))
+stats_wh = 104/37
+
+battle_stats = pygame.image.load(
+    'pics/battle/stats.png').convert_alpha()
+battle_stats = pygame.transform.scale(
+    battle_stats, (250, int(250/stats_wh)))
+
+
 imgs_run = [[ashleft1, ashleft2], [ashright1, ashright2],
             [ashdown1, ashdown2], [ashup1, ashup2]]
 x = -3090
@@ -83,26 +95,81 @@ f = open('feilds.pk', 'rb')
 feilds = pickle.load(f)
 game_speed = 30
 lastMove = "down"
-game_font = pygame.font.Font('04B_19.ttf', 40)
-pokemon = pokemon = pypokedex.get(
+pokemon = pypokedex.get(
     dex=3)
 sameBattle = False
 levelPokemon = 0
 caught = False
+# Define Colours
+WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+BLACK = (0, 0, 0)
+FUCHSIA = (255, 0, 255)
+GRAY = (128, 128, 128)
+LIME = (0, 128, 0)
+MAROON = (128, 0, 0)
+NAVYBLUE = (0, 0, 128)
+OLIVE = (128, 128, 0)
+PURPLE = (128, 0, 128)
+TEAL = (0, 128, 128)
+fights = []
+x_arrow, y_arrow = 590, 350
+chose = "a"
+
+attacks = ["Sky Attack", "wambo1", "wambo2", "wambo3"]
 
 
-def printFont(stringP):
-    score_surface = game_font.render(
-        stringP, True, (255, 255, 255))
+def printFont(stringP, color, size, x, y):
 
-    score_rect = score_surface.get_rect(center=(288, 100))
+    score_surface = pygame.font.Font('font.ttf', size).render(
+        stringP, True, color)
+
+    score_rect = score_surface.get_rect(center=(x, y))
     screen.blit(score_surface, score_rect)
+
+
+def printThick(stringP, color, size, x, y):
+    printFont(stringP, color, size, x, y)
+    printFont(stringP, color, size, x+1, y)
+    printFont(stringP, color, size, x+2, y)
+
+
+def drawStats(x, y, lengthRect, pokemonName, Poklvl):
+    screen.blit(battle_stats, (x, y))
+    printThick(str(int(Poklvl)), BLACK, 30, x+225, y+20)
+    printFont(pokemonName, BLACK, 40, x+100, y+15)
+    pygame.draw.rect(screen, LIME, (x+114, y+40, lengthRect, 9))
+
+
+def printText(text, color, size, x, y):
+    text_obj = pygame.font.Font('font.ttf', size).render(text, True, color)
+    screen.blit(text_obj, (x, y))
 
 
 def battle():
     screen.blit(battle_Sur, (0, 0))
     screen.blit(pokemon_pic, (550, 100))
-    printFont(str(int(levelPokemon)))
+    screen.blit(battle_Choose, (250, 330))
+    drawStats(0, 0, 118, pokemon.name, levelPokemon)
+    drawStats(600, 250, 118, pokemon.name, levelPokemon)
+    printText(pokemon.name, WHITE, 45, 280, 390)
+    if chose == "Fight":
+        printText(">", BLACK, 37, x_arrow, y_arrow)
+
+        printText(attacks[0], BLACK, 28, 600, 350)
+        printText(attacks[1], BLACK, 28, 600, 400)
+        printText(attacks[2], BLACK, 28, 700, 350)
+        printText(attacks[3], BLACK, 28, 700, 400)
+
+    elif chose == "Pokemon":
+        print("show pokemons")
+    else:
+        printText(">", BLACK, 37, x_arrow, y_arrow)
+
+        printText("Fight", BLACK, 37, 600, 350)
+        printText("Pokemon", BLACK, 37, 600, 400)
 
 
 while True:
@@ -119,15 +186,26 @@ while True:
         battle()
         sameBattle = True
     elif In_Battle and sameBattle:
-
-        if not caught and keyState[pygame.K_SPACE]:
+        if keyState[pygame.K_RIGHT] and x_arrow == 590 and chose == "Fight":
+            x_arrow += 100
+        elif keyState[pygame.K_LEFT] and x_arrow == 690 and chose == "Fight":
+            x_arrow -= 100
+        elif keyState[pygame.K_BACKSPACE] and chose == "Fight":
+            chose = "D"
+        elif keyState[pygame.K_DOWN] and y_arrow == 350:
+            y_arrow += 50
+        elif keyState[pygame.K_RETURN] and y_arrow == 350:
+            chose = "Fight"
+        elif keyState[pygame.K_RETURN] and y_arrow == 400:
+            chose = "Pokemon"
+        elif keyState[pygame.K_UP] and y_arrow == 400:
+            y_arrow -= 50
+        elif not caught and keyState[pygame.K_SPACE]:
 
             screen.blit(battle_Sur, (0, 0))
             screen.blit(pokeBall, (550, 260))
             if random.randint(0, 12) == 2:
                 clock.tick(1)
-
-                printFont(f"{pokemon.name} has been caught")
 
                 caught = True
                 In_Battle = False
@@ -170,39 +248,38 @@ while True:
                 if feilds[feild][0] < (x_a + abs(x)) and feilds[feild][1] > (x_a + abs(x)) and feilds[feild][2] < (z_a + abs(z)) and feilds[feild][3] > (z_a + abs(z)):
                     InFeild = True
                     if random.randint(0, 60) == 42:
-                        if (feild - 1)*5 + 5 <= 150:
-                            pokemonNumber = random.randint(
-                                (feild-1)*2 + 1, (feild-1)*2 + 2)
-                            strPokNumber = "0"
-                            if pokemonNumber < 10:
-                                strPokNumber += f"0{(str(pokemonNumber))}"
-                            elif pokemonNumber < 100:
-                                strPokNumber += f"{(str(pokemonNumber))}"
-                            else:
-                                strPokNumber = str(pokemonNumber)
+                        pokemonNumber = random.randint(
+                            1, 151)
+                        strPokNumber = "0"
+                        if pokemonNumber < 10:
+                            strPokNumber += f"0{(str(pokemonNumber))}"
+                        elif pokemonNumber < 100:
+                            strPokNumber += f"{(str(pokemonNumber))}"
+                        else:
+                            strPokNumber = str(pokemonNumber)
 
-                            pokemon = pypokedex.get(
-                                dex=pokemonNumber)
+                        pokemon = pypokedex.get(
+                            dex=pokemonNumber)
 
-                            response = requests.get(
-                                f"https://www.serebii.net/pokearth/sprites/frlg/{strPokNumber}.png")
+                        response = requests.get(
+                            f"https://www.serebii.net/pokearth/sprites/frlg/{strPokNumber}.png")
 
-                            file = open("pokemon.png", "wb")
-                            file.write(response.content)
-                            file.close()
-                            fp = open("pokemon.png", "rb")
-                            im = PIL.Image.open(fp)
-                            width, height = im.size
-                            hw = height/width
-                            im.save('pokemon.png')
+                        file = open("pokemon.png", "wb")
+                        file.write(response.content)
+                        file.close()
+                        fp = open("pokemon.png", "rb")
+                        im = PIL.Image.open(fp)
+                        width, height = im.size
+                        hw = height/width
+                        im.save('pokemon.png')
 
-                            pokeSur = pygame.image.load(
-                                'pokemon.png').convert_alpha()
+                        pokeSur = pygame.image.load(
+                            'pokemon.png').convert_alpha()
 
-                            pokeSur = pygame.transform.scale(
-                                pokeSur, (150, int(150*hw)))
-                            pokemon_pic = pokeSur
-                            In_Battle = True
+                        pokeSur = pygame.transform.scale(
+                            pokeSur, (150, int(150*hw)))
+                        pokemon_pic = pokeSur
+                        In_Battle = True
                     break
             Hit = False
             x -= m_s
@@ -234,39 +311,38 @@ while True:
                 if feilds[feild][0] < (x_a + abs(x)) and feilds[feild][1] > (x_a + abs(x)) and feilds[feild][2] < (z_a + abs(z)) and feilds[feild][3] > (z_a + abs(z)):
                     InFeild = True
                     if random.randint(0, 60) == 42:
-                        if (feild - 1)*5 + 5 <= 150:
-                            pokemonNumber = random.randint(
-                                (feild-1)*2 + 1, (feild-1)*2 + 2)
-                            strPokNumber = "0"
-                            if pokemonNumber < 10:
-                                strPokNumber += f"0{(str(pokemonNumber))}"
-                            elif pokemonNumber < 100:
-                                strPokNumber += f"{(str(pokemonNumber))}"
-                            else:
-                                strPokNumber = str(pokemonNumber)
+                        pokemonNumber = random.randint(
+                            1, 151)
+                        strPokNumber = "0"
+                        if pokemonNumber < 10:
+                            strPokNumber += f"0{(str(pokemonNumber))}"
+                        elif pokemonNumber < 100:
+                            strPokNumber += f"{(str(pokemonNumber))}"
+                        else:
+                            strPokNumber = str(pokemonNumber)
 
-                            pokemon = pypokedex.get(
-                                dex=pokemonNumber)
+                        pokemon = pypokedex.get(
+                            dex=pokemonNumber)
 
-                            response = requests.get(
-                                f"https://www.serebii.net/pokearth/sprites/frlg/{strPokNumber}.png")
+                        response = requests.get(
+                            f"https://www.serebii.net/pokearth/sprites/frlg/{strPokNumber}.png")
 
-                            file = open("pokemon.png", "wb")
-                            file.write(response.content)
-                            file.close()
-                            fp = open("pokemon.png", "rb")
-                            im = PIL.Image.open(fp)
-                            width, height = im.size
-                            hw = height/width
-                            im.save('pokemon.png')
+                        file = open("pokemon.png", "wb")
+                        file.write(response.content)
+                        file.close()
+                        fp = open("pokemon.png", "rb")
+                        im = PIL.Image.open(fp)
+                        width, height = im.size
+                        hw = height/width
+                        im.save('pokemon.png')
 
-                            pokeSur = pygame.image.load(
-                                'pokemon.png').convert_alpha()
+                        pokeSur = pygame.image.load(
+                            'pokemon.png').convert_alpha()
 
-                            pokeSur = pygame.transform.scale(
-                                pokeSur, (150, int(150*hw)))
-                            pokemon_pic = pokeSur
-                            In_Battle = True
+                        pokeSur = pygame.transform.scale(
+                            pokeSur, (150, int(150*hw)))
+                        pokemon_pic = pokeSur
+                        In_Battle = True
                     break
             Hit = False
             x += m_s
@@ -296,39 +372,38 @@ while True:
                 if feilds[feild][0] < (x_a + abs(x)) and feilds[feild][1] > (x_a + abs(x)) and feilds[feild][2] < (z_a + abs(z)) and feilds[feild][3] > (z_a + abs(z)):
                     InFeild = True
                     if random.randint(0, 60) == 42:
-                        if (feild - 1)*5 + 5 <= 150:
-                            pokemonNumber = random.randint(
-                                (feild-1)*2 + 1, (feild-1)*2 + 2)
-                            strPokNumber = "0"
-                            if pokemonNumber < 10:
-                                strPokNumber += f"0{(str(pokemonNumber))}"
-                            elif pokemonNumber < 100:
-                                strPokNumber += f"{(str(pokemonNumber))}"
-                            else:
-                                strPokNumber = str(pokemonNumber)
+                        pokemonNumber = random.randint(
+                            1, 151)
+                        strPokNumber = "0"
+                        if pokemonNumber < 10:
+                            strPokNumber += f"0{(str(pokemonNumber))}"
+                        elif pokemonNumber < 100:
+                            strPokNumber += f"{(str(pokemonNumber))}"
+                        else:
+                            strPokNumber = str(pokemonNumber)
 
-                            pokemon = pypokedex.get(
-                                dex=pokemonNumber)
+                        pokemon = pypokedex.get(
+                            dex=pokemonNumber)
 
-                            response = requests.get(
-                                f"https://www.serebii.net/pokearth/sprites/frlg/{strPokNumber}.png")
+                        response = requests.get(
+                            f"https://www.serebii.net/pokearth/sprites/frlg/{strPokNumber}.png")
 
-                            file = open("pokemon.png", "wb")
-                            file.write(response.content)
-                            file.close()
-                            fp = open("pokemon.png", "rb")
-                            im = PIL.Image.open(fp)
-                            width, height = im.size
-                            hw = height/width
-                            im.save('pokemon.png')
+                        file = open("pokemon.png", "wb")
+                        file.write(response.content)
+                        file.close()
+                        fp = open("pokemon.png", "rb")
+                        im = PIL.Image.open(fp)
+                        width, height = im.size
+                        hw = height/width
+                        im.save('pokemon.png')
 
-                            pokeSur = pygame.image.load(
-                                'pokemon.png').convert_alpha()
+                        pokeSur = pygame.image.load(
+                            'pokemon.png').convert_alpha()
 
-                            pokeSur = pygame.transform.scale(
-                                pokeSur, (150, int(150*hw)))
-                            pokemon_pic = pokeSur
-                            In_Battle = True
+                        pokeSur = pygame.transform.scale(
+                            pokeSur, (150, int(150*hw)))
+                        pokemon_pic = pokeSur
+                        In_Battle = True
                     break
             Hit = False
             z -= m_s
@@ -358,39 +433,38 @@ while True:
                 if feilds[feild][0] < (x_a + abs(x)) and feilds[feild][1] > (x_a + abs(x)) and feilds[feild][2] < (z_a + abs(z)) and feilds[feild][3] > (z_a + abs(z)):
                     InFeild = True
                     if random.randint(0, 60) == 42:
-                        if (feild - 1)*5 + 5 <= 150:
-                            pokemonNumber = random.randint(
-                                (feild-1)*2 + 1, (feild-1)*2 + 2)
-                            strPokNumber = "0"
-                            if pokemonNumber < 10:
-                                strPokNumber += f"0{(str(pokemonNumber))}"
-                            elif pokemonNumber < 100:
-                                strPokNumber += f"{(str(pokemonNumber))}"
-                            else:
-                                strPokNumber = string(pokemonNumber)
+                        pokemonNumber = random.randint(
+                            1, 151)
+                        strPokNumber = "0"
+                        if pokemonNumber < 10:
+                            strPokNumber += f"0{(str(pokemonNumber))}"
+                        elif pokemonNumber < 100:
+                            strPokNumber += f"{(str(pokemonNumber))}"
+                        else:
+                            strPokNumber = str(pokemonNumber)
 
-                            pokemon = pypokedex.get(
-                                dex=pokemonNumber)
+                        pokemon = pypokedex.get(
+                            dex=pokemonNumber)
 
-                            response = requests.get(
-                                f"https://www.serebii.net/pokearth/sprites/frlg/{strPokNumber}.png")
+                        response = requests.get(
+                            f"https://www.serebii.net/pokearth/sprites/frlg/{strPokNumber}.png")
 
-                            file = open("pokemon.png", "wb")
-                            file.write(response.content)
-                            file.close()
-                            fp = open("pokemon.png", "rb")
-                            im = PIL.Image.open(fp)
-                            width, height = im.size
-                            hw = height/width
-                            im.save('pokemon.png')
+                        file = open("pokemon.png", "wb")
+                        file.write(response.content)
+                        file.close()
+                        fp = open("pokemon.png", "rb")
+                        im = PIL.Image.open(fp)
+                        width, height = im.size
+                        hw = height/width
+                        im.save('pokemon.png')
 
-                            pokeSur = pygame.image.load(
-                                'pokemon.png').convert_alpha()
+                        pokeSur = pygame.image.load(
+                            'pokemon.png').convert_alpha()
 
-                            pokeSur = pygame.transform.scale(
-                                pokeSur, (150, int(150*hw)))
-                            pokemon_pic = pokeSur
-                            In_Battle = True
+                        pokeSur = pygame.transform.scale(
+                            pokeSur, (150, int(150*hw)))
+                        pokemon_pic = pokeSur
+                        In_Battle = True
                     break
             Hit = False
             z += 10
