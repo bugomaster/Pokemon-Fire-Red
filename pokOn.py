@@ -14,6 +14,7 @@ import pickle
 import requests
 from PIL.Image import Image
 import http
+from datetime import datetime
 pygame.init()
 screen = pygame.display.set_mode((850, 450))
 clock = pygame.time.Clock()
@@ -48,7 +49,7 @@ ashleft2 = pygame.image.load('pics/ashleft2.png').convert_alpha()
 ashleft2 = pygame.transform.scale(ashleft2, (50, 62))
 ashleft3 = pygame.image.load('pics/ashleft3.png').convert_alpha()
 ashleft3 = pygame.transform.scale(ashleft3, (50, 62))
-
+whenThrew = "0"
 ashright1 = pygame.image.load('pics/ashright1.png').convert_alpha()
 ashright1 = pygame.transform.scale(ashright1, (50, 62))
 ashright2 = pygame.image.load('pics/ashright2.png').convert_alpha()
@@ -67,7 +68,7 @@ battle_stats = pygame.image.load(
     'pics/battle/stats.png').convert_alpha()
 battle_stats = pygame.transform.scale(
     battle_stats, (250, int(250/stats_wh)))
-
+whenFightChosen = 0
 
 imgs_run = [[ashleft1, ashleft2], [ashright1, ashright2],
             [ashdown1, ashdown2], [ashup1, ashup2]]
@@ -78,7 +79,7 @@ ez1 = []
 
 Press_1 = 0
 Press_12 = 0
-
+noPokeMonPic = False
 x_a = 850/2
 z_a = 450/2
 i = 0
@@ -101,6 +102,7 @@ game_speed = 30
 lastMove = "down"
 pokemon = pypokedex.get(
     dex=3)
+didNothing = False
 sameBattle = False
 levelPokemon = 0
 caught = False
@@ -120,10 +122,19 @@ PURPLE = (128, 0, 128)
 TEAL = (0, 128, 128)
 fights = []
 x_arrow, y_arrow = 570, 350
-chose = "a"
+chose = "Default"
 
 attacks = ["Sky Attack", "wambo1", "wambo2", "wambo3"]
 attacks_wild = []
+attacks_wild_damage = [80, 30, 40, 40]
+MyPokemonNumbers = [12, 48, 85, 132]
+MyPokemonLvls = [4, 7, 11, 5]
+
+mypokemon = pypokedex.get(
+    dex=MyPokemonNumbers[0])
+
+choseNumber = 0
+tryingTooCatch = False
 
 
 def InFeild():
@@ -132,23 +143,19 @@ def InFeild():
     global pokeBack
     global In_Battle
     global attacks_wild
+    global mypokemon
     for feild in range(0, len(feilds)):
         if feilds[feild][0] < (x_a + abs(x)) and feilds[feild][1] > (x_a + abs(x)) and feilds[feild][2] < (z_a + abs(z)) and feilds[feild][3] > (z_a + abs(z)):
             if random.randint(0, 60) == 42:
                 pokemonNumber = random.randint(
                     1, 151)
-                strPokNumber = "0"
-                if pokemonNumber < 10:
-                    strPokNumber += f"0{(str(pokemonNumber))}"
-                elif pokemonNumber < 100:
-                    strPokNumber += f"{(str(pokemonNumber))}"
-                else:
-                    strPokNumber = str(pokemonNumber)
-
+                pokemonColor = 'default'
+                if random.randint(0, 200) == 69:
+                    pokemonColor = 'shiny'
                 pokemon = pypokedex.get(
                     dex=pokemonNumber)
                 response = requests.get(
-                    pokemon.sprites.front.get('default'))
+                    pokemon.sprites.front.get(pokemonColor))
 
                 file = open("pokemon.png", "wb")
                 file.write(response.content)
@@ -165,9 +172,10 @@ def InFeild():
                 pokeSur = pygame.transform.scale(
                     pokeSur, (200, int(200*hw)))
                 pokemon_pic = pokeSur
-
+                mypokemon = pypokedex.get(
+                    dex=MyPokemonNumbers[0])
                 response = requests.get(
-                    pokemon.sprites.back.get('default'))
+                    mypokemon.sprites.back.get('default'))
 
                 file = open("pokemonBack.png", "wb")
                 file.write(response.content)
@@ -175,6 +183,7 @@ def InFeild():
                 fp = open("pokemonBack.png", "rb")
                 im = PIL.Image.open(fp)
                 width, height = im.size
+
                 hw = height/width
                 im.save('pokemonBack.png')
 
@@ -197,7 +206,7 @@ def InFeild():
                     if line_count >= 36:
                         if one_a_tag['href'][1:5] == "type":
                             typee = (one_a_tag['href'][6:])
-                        elif one_a_tag['href'][1:5] == "move" and typee == pokemon.types[0]:
+                        elif one_a_tag['href'][1:5] == "move" and typee == mypokemon.types[0]:
                             attacks_wild.append(one_a_tag['href'][6:])
                             counter += 1
                         if counter == 4:
@@ -236,37 +245,41 @@ def printText(text, color, size, x, y):
 
 def battle():
     screen.blit(battle_Sur, (0, 0))
-    screen.blit(pokemon_pic, (550, 100))
-    screen.blit(pokeBack, (50, 270))
+    if not tryingTooCatch:
 
-    screen.blit(battle_Choose, (250, 330))
-    drawStats(0, 0, 118, pokemon.name, levelPokemon)
-    drawStats(600, 250, 118, pokemon.name, levelPokemon)
-    printText(pokemon.name, WHITE, 45, 280, 390)
+        if not noPokeMonPic:
+            screen.blit(pokemon_pic, (550, 100))
+        else:
+            printText(f"you caught {pokemon.name}", BLACK, 45, 550, 100)
+        screen.blit(pokeBack, (50, 270))
 
-    if chose == "Fight":
+        screen.blit(battle_Choose, (250, 330))
+        drawStats(0, 0, 118, pokemon.name, levelPokemon)
+        drawStats(600, 250, 118, mypokemon.name, MyPokemonLvls[0])
+        printText(mypokemon.name, WHITE, 45, 280, 390)
 
-        printText(">", BLACK, 37, x_arrow, y_arrow)
-        printText(attacks_wild[0], BLACK, 28, 580, 350)
-        printText(attacks_wild[1], BLACK, 28, 580, 400)
-        printText(attacks_wild[2], BLACK, 28, 700, 350)
-        printText(attacks_wild[3], BLACK, 28, 700, 400)
+        if chose == "Fight":
 
-    elif chose == "Pokemon":
-        print("show pokemons")
+            printText(">", BLACK, 37, x_arrow, y_arrow)
+            printText(attacks_wild[0], BLACK, 28, 580, 350)
+            printText(attacks_wild[1], BLACK, 28, 580, 400)
+            printText(attacks_wild[2], BLACK, 28, 700, 350)
+            printText(attacks_wild[3], BLACK, 28, 700, 400)
+
+        elif chose == "Pokemon":
+            print("show pokemons")
+        else:
+            printText(">", BLACK, 37, x_arrow, y_arrow)
+
+            printText("Fight", BLACK, 37, 580, 350)
+            printText("Pokemon", BLACK, 37, 580, 400)
     else:
-        printText(">", BLACK, 37, x_arrow, y_arrow)
-
-        printText("Fight", BLACK, 37, 580, 350)
-        printText("Pokemon", BLACK, 37, 580, 400)
+        screen.blit(battle_Sur, (0, 0))
+        screen.blit(pokeBall, (550, 260))
 
 
 while True:
-    if not caught and In_Battle and sameBattle:
-        battle()
-
-    else:
-        clock.tick(game_speed)
+    clock.tick(game_speed)
     keyState = pygame.key.get_pressed()
 
     if In_Battle and not sameBattle:
@@ -275,43 +288,54 @@ while True:
         battle()
         sameBattle = True
     elif In_Battle and sameBattle:
+        if whenThrew != "0" and (int(datetime.now().strftime("%H:%M:%S")[6:]) - int(whenThrew[6:]) > 3):
+            if random.randint(0, 3) == 2:
+
+                caught = True
+                noPokeMonPic = True
+                battle()
+            else:
+                whenThrew = "0"  # new throw
+                battle()
+            tryingTooCatch = False
         if keyState[pygame.K_RIGHT] and x_arrow == 570 and chose == "Fight":
             x_arrow += 120
+            choseNumber -= 1
         elif keyState[pygame.K_LEFT] and x_arrow == 690 and chose == "Fight":
             x_arrow -= 120
-        elif keyState[pygame.K_BACKSPACE] and chose == "Fight":
-            chose = "D"
+            choseNumber += 1
+        elif keyState[pygame.K_z] and chose == "Fight":
+            chose = "Default"
         elif keyState[pygame.K_DOWN] and y_arrow == 350:
             y_arrow += 50
-        elif keyState[pygame.K_RETURN] and y_arrow == 350:
+            choseNumber += 2
+        elif keyState[pygame.K_x] and y_arrow == 350 and chose == "Default":
             chose = "Fight"
-        elif keyState[pygame.K_RETURN] and y_arrow == 400:
+            whenFightChosen = datetime.now().strftime("%H:%M:%S")
+        elif keyState[pygame.K_x] and chose == "Fight" and (int(datetime.now().strftime("%H:%M:%S")[6:]) - int(whenFightChosen[6:]) > 1):
+            print(f"do {attacks_wild[choseNumber]}")
+        elif keyState[pygame.K_x] and y_arrow == 400 and chose == "Default":
             chose = "Pokemon"
         elif keyState[pygame.K_UP] and y_arrow == 400:
             y_arrow -= 50
-        elif not caught and keyState[pygame.K_SPACE]:
 
-            screen.blit(battle_Sur, (0, 0))
-            screen.blit(pokeBall, (550, 260))
-            if random.randint(0, 12) == 2:
-                clock.tick(1)
+            choseNumber -= 2
+        elif whenThrew == "0" and not caught and keyState[pygame.K_SPACE]:
+            whenThrew = datetime.now().strftime("%H:%M:%S")
+            tryingTooCatch = True
+        battle()
 
-                caught = True
-                In_Battle = False
-                sameBattle = False
-                screen.blit(bg_surface, (x, z))
-
-                screen.blit(imgs_run[i][j], (x_a, z_a))
-            else:
-                clock.tick(1)
-                screen.blit(battle_Sur, (0, 0))
-                screen.blit(pokeBall, (550, 260))
         if keyState[pygame.K_ESCAPE] and In_Battle:
             In_Battle = False
             sameBattle = False
             screen.blit(bg_surface, (x, z))
             chose = "D"
+            whenThrew = "0"
+            attacks_wild = []
+            x_arrow, y_arrow = 570, 350
+            caught = False
             screen.blit(imgs_run[i][j], (x_a, z_a))
+            noPokeMonPic = False
     else:
         if not keyState[pygame.K_1]:
             Press_1 = 0
