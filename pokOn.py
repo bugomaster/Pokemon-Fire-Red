@@ -300,15 +300,17 @@ while True:
             tryingTooCatch = False
         if keyState[pygame.K_RIGHT] and x_arrow == 570 and chose == "Fight":
             x_arrow += 120
-            choseNumber -= 1
+            choseNumber -= 2
         elif keyState[pygame.K_LEFT] and x_arrow == 690 and chose == "Fight":
             x_arrow -= 120
-            choseNumber += 1
+            choseNumber += 2
         elif keyState[pygame.K_z] and chose == "Fight":
             chose = "Default"
+            x_arrow, y_arrow = 570, 350
+
         elif keyState[pygame.K_DOWN] and y_arrow == 350:
             y_arrow += 50
-            choseNumber += 2
+            choseNumber += 1
         elif keyState[pygame.K_x] and y_arrow == 350 and chose == "Default":
             chose = "Fight"
             whenFightChosen = datetime.now().strftime("%H:%M:%S")
@@ -319,7 +321,7 @@ while True:
         elif keyState[pygame.K_UP] and y_arrow == 400:
             y_arrow -= 50
 
-            choseNumber -= 2
+            choseNumber -= 1
         elif whenThrew == "0" and not caught and keyState[pygame.K_SPACE]:
             whenThrew = datetime.now().strftime("%H:%M:%S")
             tryingTooCatch = True
