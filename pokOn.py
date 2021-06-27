@@ -1,3 +1,4 @@
+import socket
 from bs4 import BeautifulSoup
 import time
 import urllib.request
@@ -15,6 +16,7 @@ import requests
 from PIL.Image import Image
 import http
 from datetime import datetime
+import threading
 pygame.init()
 screen = pygame.display.set_mode((850, 450))
 clock = pygame.time.Clock()
@@ -135,6 +137,13 @@ mypokemon = pypokedex.get(
 
 choseNumber = 0
 tryingTooCatch = False
+WildPoks = [[1, 4, 7], [10, 13, 16], [19, 21, 23],
+            [25, 27, 29], [32, 35, 37], [39, 41, 43]]
+
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+strCords = ""
+beforeCords = "df"
 
 
 def InFeild():
@@ -147,8 +156,10 @@ def InFeild():
     for feild in range(0, len(feilds)):
         if feilds[feild][0] < (x_a + abs(x)) and feilds[feild][1] > (x_a + abs(x)) and feilds[feild][2] < (z_a + abs(z)) and feilds[feild][3] > (z_a + abs(z)):
             if random.randint(0, 60) == 42:
+
                 pokemonNumber = random.randint(
-                    1, 151)
+                    feild//3, feild//3 + 6)
+
                 pokemonColor = 'default'
                 if random.randint(0, 200) == 69:
                     pokemonColor = 'shiny'
@@ -278,9 +289,78 @@ def battle():
         screen.blit(pokeBall, (550, 260))
 
 
+endidx = 0
+
+rc = ""
+gotMsg = False
+x_rc = ""
+z_rc = ""
+
+
+def handle_messages():
+    global gotMsg
+    global x_rc
+    global z_rc
+    global rc
+    while 1:
+        rc = s.recv(1204).decode()
+
+        gotMsg = False
+        x_rc = ""
+        z_rc = ""
+        for i in range(0, len(rc)):
+            if rc[i] == 'x':
+                eidx = i
+                for i2 in range(i, len(rc)):
+                    if rc[i2] == 'z':
+                        break
+                    eidx += 1
+
+                x_rc = rc[i:eidx]
+                break
+        for i in range(0, len(rc)):
+            if rc[i] == 'z':
+                eidx = i
+                for i2 in range(i, len(rc)):
+                    if rc[i2] == 'x':
+                        break
+                    eidx += 1
+
+                z_rc = rc[i:eidx]
+                break
+        gotMsg = True
+
+
+def input_handler():
+    while 1:
+        s.send((f"x{x}z{z}").encode())
+
+
+while True:
+    try:
+
+        s.connect((socket.gethostbyname(socket.gethostname()), 12345))
+        break
+    except:
+        pass
+
+message_handler = threading.Thread(target=handle_messages, args=())
+message_handler.start()
+
+input_handler = threading.Thread(target=input_handler, args=())
+input_handler.start()
 while True:
     clock.tick(game_speed)
     keyState = pygame.key.get_pressed()
+    if gotMsg:
+        screen.blit(bg_surface, (x, z))
+        try:
+            screen.blit(
+                imgs_run[i][j], (x_a+(x - int(x_rc[1:])), z_a+(z - int(z_rc[1:]))))
+        except:
+            pass
+        screen.blit(
+            imgs_run[i][j], (x_a, z_a))
 
     if In_Battle and not sameBattle:
         levelPokemon = random.randint(1, 10)
@@ -331,7 +411,7 @@ while True:
             In_Battle = False
             sameBattle = False
             screen.blit(bg_surface, (x, z))
-            chose = "D"
+            chose = "Default"
             whenThrew = "0"
             attacks_wild = []
             x_arrow, y_arrow = 570, 350
@@ -378,7 +458,13 @@ while True:
                 x -= m_s
                 screen.blit(bg_surface, (x, z))
 
-                screen.blit(imgs_run[i][j], (x_a, z_a))
+                try:
+                    screen.blit(
+                        imgs_run[i][j], (x_a+(x - int(x_rc[1:])), z_a+(z - int(z_rc[1:]))))
+                except:
+                    pass
+                screen.blit(
+                    imgs_run[i][j], (x_a, z_a))
 
                 j += nig
                 nig *= -1
@@ -403,8 +489,14 @@ while True:
                 i = 0
                 x += m_s
                 screen.blit(bg_surface, (x, z))
+                try:
+                    screen.blit(
+                        imgs_run[i][j], (x_a+(x - int(x_rc[1:])), z_a+(z - int(z_rc[1:]))))
+                except:
+                    pass
+                screen.blit(
+                    imgs_run[i][j], (x_a, z_a))
 
-                screen.blit(imgs_run[i][j], (x_a, z_a))
                 j += nig
                 nig *= -1
         elif keyState[pygame.K_DOWN]:
@@ -429,7 +521,14 @@ while True:
                 z -= m_s
                 screen.blit(bg_surface, (x, z))
 
-                screen.blit(imgs_run[i][j], (x_a, z_a))
+                try:
+                    screen.blit(
+                        imgs_run[i][j], (x_a+(x - int(x_rc[1:])), z_a+(z - int(z_rc[1:]))))
+                except:
+                    pass
+                screen.blit(
+                    imgs_run[i][j], (x_a, z_a))
+
                 j += nig
                 nig *= -1
         elif keyState[pygame.K_UP]:
@@ -454,7 +553,13 @@ while True:
                 z += 10
                 screen.blit(bg_surface, (x, z))
 
-                screen.blit(imgs_run[i][j], (x_a, z_a))
+                try:
+                    screen.blit(
+                        imgs_run[i][j], (x_a+(x - int(x_rc[1:])), z_a+(z - int(z_rc[1:]))))
+                except:
+                    pass
+                screen.blit(
+                    imgs_run[i][j], (x_a, z_a))
 
                 j += nig
                 nig *= -1
