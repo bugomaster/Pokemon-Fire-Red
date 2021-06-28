@@ -295,12 +295,16 @@ rc = ""
 gotMsg = False
 x_rc = ""
 z_rc = ""
+i_rc = ""
+j_rc = ""
 
 
 def handle_messages():
     global gotMsg
     global x_rc
     global z_rc
+    global i_rc
+    global j_rc
     global rc
     while 1:
         rc = s.recv(1204).decode()
@@ -308,6 +312,8 @@ def handle_messages():
         gotMsg = False
         x_rc = ""
         z_rc = ""
+        i_rc = ""
+        j_rc = ""
         for i in range(0, len(rc)):
             if rc[i] == 'x':
                 eidx = i
@@ -322,18 +328,38 @@ def handle_messages():
             if rc[i] == 'z':
                 eidx = i
                 for i2 in range(i, len(rc)):
-                    if rc[i2] == 'x':
+                    if rc[i2] == 'i':
                         break
                     eidx += 1
 
                 z_rc = rc[i:eidx]
+                break
+        for i in range(0, len(rc)):
+            if rc[i] == 'i':
+                eidx = i
+                for i2 in range(i, len(rc)):
+                    if rc[i2] == 'j':
+                        break
+                    eidx += 1
+
+                i_rc = rc[i:eidx]
+                break
+        for i in range(0, len(rc)):
+            if rc[i] == 'j':
+                eidx = i
+                for i2 in range(i, len(rc)):
+                    if rc[i2] == 'x':
+                        break
+                    eidx += 1
+
+                j_rc = rc[i:eidx]
                 break
         gotMsg = True
 
 
 def input_handler():
     while 1:
-        s.send((f"x{x}z{z}").encode())
+        s.send((f"x{x}z{z}i{i}j{j}").encode())
 
 
 while True:
@@ -356,7 +382,7 @@ while True:
         screen.blit(bg_surface, (x, z))
         try:
             screen.blit(
-                imgs_run[i][j], (x_a+(x - int(x_rc[1:])), z_a+(z - int(z_rc[1:]))))
+                imgs_run[int(i_rc[1:])][int(j_rc[1:])], (x_a+(x - int(x_rc[1:])), z_a+(z - int(z_rc[1:]))))
         except:
             pass
         screen.blit(
@@ -456,15 +482,6 @@ while True:
 
                 i = 1
                 x -= m_s
-                screen.blit(bg_surface, (x, z))
-
-                try:
-                    screen.blit(
-                        imgs_run[i][j], (x_a+(x - int(x_rc[1:])), z_a+(z - int(z_rc[1:]))))
-                except:
-                    pass
-                screen.blit(
-                    imgs_run[i][j], (x_a, z_a))
 
                 j += nig
                 nig *= -1
@@ -488,14 +505,6 @@ while True:
 
                 i = 0
                 x += m_s
-                screen.blit(bg_surface, (x, z))
-                try:
-                    screen.blit(
-                        imgs_run[i][j], (x_a+(x - int(x_rc[1:])), z_a+(z - int(z_rc[1:]))))
-                except:
-                    pass
-                screen.blit(
-                    imgs_run[i][j], (x_a, z_a))
 
                 j += nig
                 nig *= -1
@@ -519,16 +528,6 @@ while True:
                 lastMove = "down"
                 i = 2
                 z -= m_s
-                screen.blit(bg_surface, (x, z))
-
-                try:
-                    screen.blit(
-                        imgs_run[i][j], (x_a+(x - int(x_rc[1:])), z_a+(z - int(z_rc[1:]))))
-                except:
-                    pass
-                screen.blit(
-                    imgs_run[i][j], (x_a, z_a))
-
                 j += nig
                 nig *= -1
         elif keyState[pygame.K_UP]:
@@ -551,15 +550,6 @@ while True:
                 i = 3
 
                 z += 10
-                screen.blit(bg_surface, (x, z))
-
-                try:
-                    screen.blit(
-                        imgs_run[i][j], (x_a+(x - int(x_rc[1:])), z_a+(z - int(z_rc[1:]))))
-                except:
-                    pass
-                screen.blit(
-                    imgs_run[i][j], (x_a, z_a))
 
                 j += nig
                 nig *= -1
