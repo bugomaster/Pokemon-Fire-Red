@@ -14,6 +14,10 @@ def handle_client(c, addr):
         except:
             c.shutdown(socket.SHUT_RDWR)
             clients.remove(c)
+
+            print(str(username_lookup[c])+' left the room.')
+            broadcast(f"S{str(username_lookup[c])}EL")
+
             break
 
         if msg.decode() != '':
@@ -40,7 +44,8 @@ while True:
 
     username = c.recv(1024).decode()
 
-    broadcast(c.recv(1024).decode())
+    print(f"{username} connected")
+    broadcast(f"S{username}EJ")
 
     username_lookup[c] = username
 

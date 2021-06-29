@@ -1,22 +1,16 @@
-import socket
-from bs4 import BeautifulSoup
-import time
-import urllib.request
 import pygame
 import sys
-import random
-import pypokedex
-import urllib3
-from io import BytesIO
-import tkinter as tk
-import PIL.Image
-import PIL.ImageTk
 import pickle
-import requests
-from PIL.Image import Image
-import http
-from datetime import datetime
+import pypokedex
+import socket
 import threading
+import requests
+import random
+import PIL
+from bs4 import BeautifulSoup
+import datetime
+
+
 pygame.init()
 screen = pygame.display.set_mode((850, 450))
 clock = pygame.time.Clock()
@@ -297,6 +291,10 @@ x_rc = ""
 z_rc = ""
 i_rc = ""
 j_rc = ""
+j_otherP = 0
+i_otherP = 0
+z_otherP = 0
+x_otherP = 0
 
 
 def handle_messages():
@@ -305,56 +303,87 @@ def handle_messages():
     global z_rc
     global i_rc
     global j_rc
+    global j_otherP
+    global i_otherP
+    global z_otherP
+    global x_otherP
+
     global rc
     while 1:
-        rc = s.recv(1204).decode()
+        rc = s.recv(1024).decode()
 
         gotMsg = False
         x_rc = ""
         z_rc = ""
         i_rc = ""
         j_rc = ""
+
+        dont = False
         for i in range(0, len(rc)):
-            if rc[i] == 'x':
+            if rc[i] == 'S':
                 eidx = i
+                i3 = 0
                 for i2 in range(i, len(rc)):
-                    if rc[i2] == 'z':
+                    if rc[i2] == 'E':
+                        i3 = i2 + 1
                         break
                     eidx += 1
+                if rc[i3] == 'J':
+                    print(f"{rc[i+1:eidx]} joined")
+                elif rc[i3] == 'L':
+                    print(f"{rc[i+1:eidx]} left")
 
-                x_rc = rc[i:eidx]
+                dont = True
                 break
-        for i in range(0, len(rc)):
-            if rc[i] == 'z':
-                eidx = i
-                for i2 in range(i, len(rc)):
-                    if rc[i2] == 'i':
-                        break
-                    eidx += 1
+        if not dont:
+            for i in range(0, len(rc)):
+                if rc[i] == 'x':
+                    eidx = i
+                    for i2 in range(i, len(rc)):
+                        if rc[i2] == 'z':
+                            break
+                        eidx += 1
 
-                z_rc = rc[i:eidx]
-                break
-        for i in range(0, len(rc)):
-            if rc[i] == 'i':
-                eidx = i
-                for i2 in range(i, len(rc)):
-                    if rc[i2] == 'j':
-                        break
-                    eidx += 1
+                    x_rc = rc[i+1:eidx]
+                    break
+            for i in range(0, len(rc)):
+                if rc[i] == 'z':
+                    eidx = i
+                    for i2 in range(i, len(rc)):
+                        if rc[i2] == 'i':
+                            break
+                        eidx += 1
 
-                i_rc = rc[i:eidx]
-                break
-        for i in range(0, len(rc)):
-            if rc[i] == 'j':
-                eidx = i
-                for i2 in range(i, len(rc)):
-                    if rc[i2] == 'x':
-                        break
-                    eidx += 1
+                    z_rc = rc[i+1:eidx]
+                    break
+            for i in range(0, len(rc)):
+                if rc[i] == 'i':
+                    eidx = i
+                    for i2 in range(i, len(rc)):
+                        if rc[i2] == 'j':
+                            break
+                        eidx += 1
 
-                j_rc = rc[i:eidx]
-                break
-        gotMsg = True
+                    i_rc = rc[i+1:eidx]
+                    break
+            for i in range(0, len(rc)):
+                if rc[i] == 'j':
+                    eidx = i
+                    for i2 in range(i, len(rc)):
+                        if rc[i2] == 'x':
+                            break
+                        eidx += 1
+
+                    j_rc = rc[i+1:eidx]
+                    break
+            gotMsg = True
+            try:
+                x_otherP = int(x_rc)
+                z_otherP = int(z_rc)
+                i_otherP = int(i_rc)
+                j_otherP = int(j_rc)
+            except:
+                pass
 
 
 def input_handler():
@@ -369,20 +398,29 @@ while True:
         break
     except:
         pass
+username = input('Enter username --> ')
+s.send(username.encode())
 
 message_handler = threading.Thread(target=handle_messages, args=())
 message_handler.start()
-
+x_rc_s = 0
+z_rc_s = 0
+x_a_s = 0
+z_a_s = 0
 input_handler = threading.Thread(target=input_handler, args=())
 input_handler.start()
 while True:
+
     clock.tick(game_speed)
     keyState = pygame.key.get_pressed()
-    if gotMsg:
+    if (gotMsg and (x_rc_s != x_otherP or z_rc_s != z_otherP)):
+        x_rc_s = x_otherP
+        z_rc_s = z_otherP
+
         screen.blit(bg_surface, (x, z))
         try:
             screen.blit(
-                imgs_run[int(i_rc[1:])][int(j_rc[1:])], (x_a+(x - int(x_rc[1:])), z_a+(z - int(z_rc[1:]))))
+                imgs_run[i_otherP][j_otherP], (x_a+(x - x_otherP), z_a+(z - z_otherP)))
         except:
             pass
         screen.blit(
@@ -482,6 +520,14 @@ while True:
 
                 i = 1
                 x -= m_s
+                screen.blit(bg_surface, (x, z))
+                try:
+                    screen.blit(
+                        imgs_run[i_otherP][j_otherP], (x_a+(x - x_otherP), z_a+(z - z_otherP)))
+                except:
+                    pass
+                screen.blit(
+                    imgs_run[i][j], (x_a, z_a))
 
                 j += nig
                 nig *= -1
@@ -505,6 +551,14 @@ while True:
 
                 i = 0
                 x += m_s
+                screen.blit(bg_surface, (x, z))
+                try:
+                    screen.blit(
+                        imgs_run[i_otherP][j_otherP], (x_a+(x - x_otherP), z_a+(z - z_otherP)))
+                except:
+                    pass
+                screen.blit(
+                    imgs_run[i][j], (x_a, z_a))
 
                 j += nig
                 nig *= -1
@@ -528,6 +582,15 @@ while True:
                 lastMove = "down"
                 i = 2
                 z -= m_s
+                screen.blit(bg_surface, (x, z))
+                try:
+                    screen.blit(
+                        imgs_run[i_otherP][j_otherP], (x_a+(x - x_otherP), z_a+(z - z_otherP)))
+                except:
+                    pass
+                screen.blit(
+                    imgs_run[i][j], (x_a, z_a))
+
                 j += nig
                 nig *= -1
         elif keyState[pygame.K_UP]:
@@ -550,6 +613,14 @@ while True:
                 i = 3
 
                 z += 10
+                screen.blit(bg_surface, (x, z))
+                try:
+                    screen.blit(
+                        imgs_run[i_otherP][j_otherP], (x_a+(x - x_otherP), z_a+(z - z_otherP)))
+                except:
+                    pass
+                screen.blit(
+                    imgs_run[i][j], (x_a, z_a))
 
                 j += nig
                 nig *= -1
