@@ -15,7 +15,7 @@ def handle_client(c, addr):
             c.shutdown(socket.SHUT_RDWR)
             clients.remove(c)
 
-            print(str(username_lookup[c])+' left the room.')
+            print(f"{username_lookup[c]} left")
             broadcast(f"S{str(username_lookup[c])}EL")
 
             break
