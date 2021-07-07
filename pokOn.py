@@ -7,8 +7,9 @@ import threading
 import requests
 import random
 import PIL
+import PIL.Image
 from bs4 import BeautifulSoup
-import datetime
+from datetime import datetime
 
 
 pygame.init()
@@ -68,7 +69,7 @@ whenFightChosen = 0
 
 imgs_run = [[ashleft1, ashleft2], [ashright1, ashright2],
             [ashdown1, ashdown2], [ashup1, ashup2]]
-x = -3090
+x = -3030
 z = -13180
 ez = []
 ez1 = []
@@ -413,7 +414,7 @@ while True:
 
     clock.tick(game_speed)
     keyState = pygame.key.get_pressed()
-    if (gotMsg and (x_rc_s != x_otherP or z_rc_s != z_otherP)):
+    if (gotMsg):
         x_rc_s = x_otherP
         z_rc_s = z_otherP
 
@@ -449,6 +450,9 @@ while True:
             x_arrow -= 120
             choseNumber += 2
         elif keyState[pygame.K_z] and chose == "Fight":
+            chose = "Default"
+            x_arrow, y_arrow = 570, 350
+        elif keyState[pygame.K_z] and chose == "Pokemon":
             chose = "Default"
             x_arrow, y_arrow = 570, 350
 
