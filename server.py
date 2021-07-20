@@ -38,15 +38,15 @@ s.listen(100)
 
 
 username_lookup = {}
-
+names = []
 while True:
     c, addr = s.accept()
 
     username = c.recv(1024).decode()
-
+    names.append(username)
     print(f"{username} connected")
     broadcast(f"S{username}EJ")
-
+    c.send((f"@{names}E").encode())
     username_lookup[c] = username
 
     clients.append(c)

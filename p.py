@@ -11,6 +11,7 @@ import PIL.Image
 from bs4 import BeautifulSoup
 from datetime import datetime
 
+import ast
 
 pygame.init()
 screen = pygame.display.set_mode((850, 450))
@@ -69,8 +70,8 @@ whenFightChosen = 0
 
 imgs_run = [[ashleft1, ashleft2], [ashright1, ashright2],
             [ashdown1, ashdown2], [ashup1, ashup2]]
-x = -3030
-z = -13180
+x = -3330
+z = -13302
 ez = []
 ez1 = []
 
@@ -153,7 +154,7 @@ def InFeild():
             if random.randint(0, 60) == 42:
 
                 pokemonNumber = random.randint(
-                    feild//3, feild//3 + 6)
+                    feild//3 + 1, feild//3 + 6)
 
                 pokemonColor = 'default'
                 if random.randint(0, 200) == 69:
@@ -288,108 +289,174 @@ endidx = 0
 
 rc = ""
 gotMsg = False
-x_rc = ""
-z_rc = ""
-i_rc = ""
-j_rc = ""
-j_otherP = 0
-i_otherP = 0
-z_otherP = 0
-x_otherP = 0
+
+usernames = []
+
+idxPl = 0
+xlist = []
+zlist = []
+ilist = []
+jlist = []
+
+newborn = False
 
 
 def handle_messages():
-    global gotMsg
-    global x_rc
-    global z_rc
-    global i_rc
-    global j_rc
-    global j_otherP
-    global i_otherP
-    global z_otherP
-    global x_otherP
-
+    global xlist
+    global zlist
+    global ilist
+    global jlist
     global rc
+    global z
+    global newborn
+    global gotMsg
+    global usernames
     while 1:
-        rc = s.recv(1024).decode()
 
         gotMsg = False
         x_rc = ""
         z_rc = ""
         i_rc = ""
         j_rc = ""
+        try:
+            rc = s.recv(1024).decode()
+            for startidx in range(0, len(rc)):
+                if rc[startidx] == '@':
+                    for endidx in range(startidx, len(rc)):
+                        if rc[endidx] == 'E':
+                            usernames = ast.literal_eval(rc[startidx+1:endidx])
+                            usernames = [n.strip() for n in usernames]
+                            for nameUs in usernames:
+                                if nameUs != username:
+                                    print(f"{nameUs} is playing")
 
-        dont = False
-        for i in range(0, len(rc)):
-            if rc[i] == 'S':
-                eidx = i
-                i3 = 0
-                for i2 in range(i, len(rc)):
-                    if rc[i2] == 'E':
-                        i3 = i2 + 1
+                            break
+                    else:
+                        continue
+                    xlist = []
+                    zlist = []
+                    ilist = []
+                    jlist = []
+                    z -= len(usernames)*62
+                    for d in usernames:
+                        xlist.append(0)
+                        zlist.append(0)
+                        ilist.append(0)
+                        jlist.append(0)
+
+                    break
+            else:
+                for i in range(0, len(rc)):
+                    if rc[i] == 'S':
+                        eidx = i
+                        i3 = 0
+                        for i2 in range(i, len(rc)):
+                            if rc[i2] == 'E':
+                                i3 = i2 + 1
+                                break
+                            eidx += 1
+                        if rc[i3] == 'J':
+                            print(f"{rc[i+1:eidx]} joined")
+                            newborn = True
+                            usernames.append(rc[i+1:eidx])
+                            xlist = []
+                            zlist = []
+                            ilist = []
+                            jlist = []
+
+                            for d in usernames:
+                                xlist.append(0)
+                                zlist.append(0)
+                                ilist.append(0)
+                                jlist.append(0)
+
+                        elif rc[i3] == 'L':
+                            print(f"{rc[i+1:eidx]} left")
+                            usernames.remove(rc[i+1:eidx])
                         break
-                    eidx += 1
-                if rc[i3] == 'J':
-                    print(f"{rc[i+1:eidx]} joined")
-                elif rc[i3] == 'L':
-                    print(f"{rc[i+1:eidx]} left")
+                else:
 
-                dont = True
-                break
-        if not dont:
-            for i in range(0, len(rc)):
-                if rc[i] == 'x':
-                    eidx = i
-                    for i2 in range(i, len(rc)):
-                        if rc[i2] == 'z':
+                    for i in range(0, len(rc)):
+                        idxPl = 0
+                        for nameU in usernames:
+                            if nameU == rc[i:i+len(nameU)]:
+                                print(f"{nameU} is moving")
+                                break
+                            idxPl += 1
+                        else:
+                            continue
+                        break
+                    for i in range(0, len(rc)):
+                        if rc[i] == 'x':
+                            eidx = i
+                            for i2 in range(i, len(rc)):
+                                if rc[i2] == 'z':
+                                    break
+                                eidx += 1
+
+                            x_rc = rc[i+1:eidx]
                             break
-                        eidx += 1
+                    for i in range(0, len(rc)):
+                        if rc[i] == 'z':
+                            eidx = i
+                            for i2 in range(i, len(rc)):
+                                if rc[i2] == 'i':
+                                    break
+                                eidx += 1
 
-                    x_rc = rc[i+1:eidx]
-                    break
-            for i in range(0, len(rc)):
-                if rc[i] == 'z':
-                    eidx = i
-                    for i2 in range(i, len(rc)):
-                        if rc[i2] == 'i':
+                            z_rc = rc[i+1:eidx]
+
                             break
-                        eidx += 1
+                    for i in range(0, len(rc)):
+                        if rc[i] == 'i':
+                            eidx = i
+                            for i2 in range(i, len(rc)):
+                                if rc[i2] == 'j':
+                                    break
+                                eidx += 1
 
-                    z_rc = rc[i+1:eidx]
-                    break
-            for i in range(0, len(rc)):
-                if rc[i] == 'i':
-                    eidx = i
-                    for i2 in range(i, len(rc)):
-                        if rc[i2] == 'j':
+                            i_rc = rc[i+1:eidx]
                             break
-                        eidx += 1
+                    for i in range(0, len(rc)):
+                        if rc[i] == 'j':
+                            eidx = i
+                            for i2 in range(i, len(rc)):
+                                if rc[i2] == 'x':
+                                    break
+                                eidx += 1
 
-                    i_rc = rc[i+1:eidx]
-                    break
-            for i in range(0, len(rc)):
-                if rc[i] == 'j':
-                    eidx = i
-                    for i2 in range(i, len(rc)):
-                        if rc[i2] == 'x':
+                            j_rc = rc[i+1:eidx]
                             break
-                        eidx += 1
 
-                    j_rc = rc[i+1:eidx]
-                    break
-            gotMsg = True
-            try:
-                x_otherP = int(x_rc)
-                z_otherP = int(z_rc)
-                i_otherP = int(i_rc)
-                j_otherP = int(j_rc)
-            except:
-                pass
+                    try:
+                        xlist[idxPl] = int(x_rc)
+                        zlist[idxPl] = int(z_rc)
+                        ilist[idxPl] = int(i_rc)
+                        jlist[idxPl] = int(j_rc)
+                        print(xlist)
+                        print(zlist)
+
+                    except:
+                        pass
+
+        except:
+            pass
 
 
 def input_handler():
+    global newborn
+    already_sent_X = 0
+    already_sent_Z = 0
+    already_sent_I = 0
+    already_sent_J = 0
     while 1:
-        s.send((f"x{x}z{z}i{i}j{j}").encode())
+        if already_sent_I != i or already_sent_J != j or already_sent_X != x or already_sent_Z != z or newborn:
+            already_sent_X = x
+            already_sent_Z = z
+            already_sent_I = i
+            already_sent_J = j
+            newborn = False
+            s.send((f"{username}x{x}z{z}i{i}j{j}").encode())
 
 
 while True:
@@ -399,33 +466,28 @@ while True:
         break
     except:
         pass
-username = input('Enter username --> ')
+username = input('Enter username ')
 s.send(username.encode())
 
 message_handler = threading.Thread(target=handle_messages, args=())
 message_handler.start()
-x_rc_s = 0
-z_rc_s = 0
-x_a_s = 0
-z_a_s = 0
+
+
 input_handler = threading.Thread(target=input_handler, args=())
 input_handler.start()
 while True:
 
     clock.tick(game_speed)
     keyState = pygame.key.get_pressed()
-    if (gotMsg):
-        x_rc_s = x_otherP
-        z_rc_s = z_otherP
-
-        screen.blit(bg_surface, (x, z))
-        try:
+    screen.blit(bg_surface, (x, z))
+    try:
+        for player in range(0, len(usernames)):
             screen.blit(
-                imgs_run[i_otherP][j_otherP], (x_a+(x - x_otherP), z_a+(z - z_otherP)))
-        except:
-            pass
-        screen.blit(
-            imgs_run[i][j], (x_a, z_a))
+                imgs_run[ilist[player]][jlist[player]], (x_a+(x - xlist[player]), z_a+(z - zlist[player])))
+    except:
+        pass
+    screen.blit(
+        imgs_run[i][j], (x_a, z_a))
 
     if In_Battle and not sameBattle:
         levelPokemon = random.randint(1, 10)
@@ -433,25 +495,27 @@ while True:
         battle()
         sameBattle = True
     elif In_Battle and sameBattle:
+
         if whenThrew != "0" and (int(datetime.now().strftime("%H:%M:%S")[6:]) - int(whenThrew[6:]) > 3):
             if random.randint(0, 3) == 2:
-
                 caught = True
                 noPokeMonPic = True
-                battle()
             else:
                 whenThrew = "0"  # new throw
-                battle()
+            battle()
             tryingTooCatch = False
         if keyState[pygame.K_RIGHT] and x_arrow == 570 and chose == "Fight":
             x_arrow += 120
             choseNumber -= 2
+
         elif keyState[pygame.K_LEFT] and x_arrow == 690 and chose == "Fight":
             x_arrow -= 120
             choseNumber += 2
+
         elif keyState[pygame.K_z] and chose == "Fight":
             chose = "Default"
             x_arrow, y_arrow = 570, 350
+
         elif keyState[pygame.K_z] and chose == "Pokemon":
             chose = "Default"
             x_arrow, y_arrow = 570, 350
@@ -459,22 +523,25 @@ while True:
         elif keyState[pygame.K_DOWN] and y_arrow == 350:
             y_arrow += 50
             choseNumber += 1
+
         elif keyState[pygame.K_x] and y_arrow == 350 and chose == "Default":
             chose = "Fight"
+
             whenFightChosen = datetime.now().strftime("%H:%M:%S")
+
         elif keyState[pygame.K_x] and chose == "Fight" and (int(datetime.now().strftime("%H:%M:%S")[6:]) - int(whenFightChosen[6:]) > 1):
             print(f"do {attacks_wild[choseNumber]}")
+
         elif keyState[pygame.K_x] and y_arrow == 400 and chose == "Default":
             chose = "Pokemon"
+
         elif keyState[pygame.K_UP] and y_arrow == 400:
             y_arrow -= 50
-
             choseNumber -= 1
         elif whenThrew == "0" and not caught and keyState[pygame.K_SPACE]:
             whenThrew = datetime.now().strftime("%H:%M:%S")
             tryingTooCatch = True
         battle()
-
         if keyState[pygame.K_ESCAPE] and In_Battle:
             In_Battle = False
             sameBattle = False
@@ -514,6 +581,10 @@ while True:
                 if arr_Ash_X_Z_range[barier][0] < (x_a + abs(x)) and arr_Ash_X_Z_range[barier][1] > (x_a + abs(x)) and arr_Ash_X_Z_range[barier][2] < (z_a + abs(z)) and arr_Ash_X_Z_range[barier][3] > (z_a + abs(z)):
                     Hit = True
                     break
+            for player_barier in range(0, len(xlist)):
+                if abs(xlist[player_barier]) + 22 > abs(x) and abs(xlist[player_barier]) - 22 < abs(x) and abs(zlist[player_barier]) - 31 < abs(z) and abs(zlist[player_barier]) + 31 > abs(z):
+                    Hit = True
+                    break
             x += m_s
             x_a -= a_s
             if lastMove == "left" and Hit:
@@ -524,14 +595,6 @@ while True:
 
                 i = 1
                 x -= m_s
-                screen.blit(bg_surface, (x, z))
-                try:
-                    screen.blit(
-                        imgs_run[i_otherP][j_otherP], (x_a+(x - x_otherP), z_a+(z - z_otherP)))
-                except:
-                    pass
-                screen.blit(
-                    imgs_run[i][j], (x_a, z_a))
 
                 j += nig
                 nig *= -1
@@ -545,6 +608,10 @@ while True:
                 if arr_Ash_X_Z_range[barier][0] < (x_a + abs(x)) and arr_Ash_X_Z_range[barier][1] > (x_a + abs(x)) and arr_Ash_X_Z_range[barier][2] < (z_a + abs(z)) and arr_Ash_X_Z_range[barier][3] > (z_a + abs(z)):
                     Hit = True
                     break
+            for player_barier in range(0, len(xlist)):
+                if abs(xlist[player_barier]) + 22 > abs(x) and abs(xlist[player_barier]) - 22 < abs(x) and abs(zlist[player_barier]) - 31 < abs(z) and abs(zlist[player_barier]) + 31 > abs(z):
+                    Hit = True
+                    break
             x -= m_s
             x_a += a_s
             if lastMove == "right" and Hit:
@@ -555,15 +622,6 @@ while True:
 
                 i = 0
                 x += m_s
-                screen.blit(bg_surface, (x, z))
-                try:
-                    screen.blit(
-                        imgs_run[i_otherP][j_otherP], (x_a+(x - x_otherP), z_a+(z - z_otherP)))
-                except:
-                    pass
-                screen.blit(
-                    imgs_run[i][j], (x_a, z_a))
-
                 j += nig
                 nig *= -1
         elif keyState[pygame.K_DOWN]:
@@ -573,6 +631,10 @@ while True:
             z_a += a_s
             for barier in range(0, len(arr_Ash_X_Z_range)):
                 if arr_Ash_X_Z_range[barier][0] < (x_a + abs(x)) and arr_Ash_X_Z_range[barier][1] > (x_a + abs(x)) and arr_Ash_X_Z_range[barier][2] < (z_a + abs(z)) and arr_Ash_X_Z_range[barier][3] > (z_a + abs(z)):
+                    Hit = True
+                    break
+            for player_barier in range(0, len(xlist)):
+                if abs(xlist[player_barier]) + 22 > abs(x) and abs(xlist[player_barier]) - 22 < abs(x) and abs(zlist[player_barier]) - 31 < abs(z) and abs(zlist[player_barier]) + 31 > abs(z):
                     Hit = True
                     break
             z += m_s
@@ -586,14 +648,6 @@ while True:
                 lastMove = "down"
                 i = 2
                 z -= m_s
-                screen.blit(bg_surface, (x, z))
-                try:
-                    screen.blit(
-                        imgs_run[i_otherP][j_otherP], (x_a+(x - x_otherP), z_a+(z - z_otherP)))
-                except:
-                    pass
-                screen.blit(
-                    imgs_run[i][j], (x_a, z_a))
 
                 j += nig
                 nig *= -1
@@ -607,6 +661,10 @@ while True:
                     Hit = True
 
                     break
+            for player_barier in range(0, len(xlist)):
+                if abs(xlist[player_barier]) + 22 > abs(x) and abs(xlist[player_barier]) - 22 < abs(x) and abs(zlist[player_barier]) - 31 < abs(z) and abs(zlist[player_barier]) + 31 > abs(z):
+                    Hit = True
+                    break
             z -= 10
             z_a += a_s
             if lastMove == "down" and Hit:
@@ -617,15 +675,6 @@ while True:
                 i = 3
 
                 z += 10
-                screen.blit(bg_surface, (x, z))
-                try:
-                    screen.blit(
-                        imgs_run[i_otherP][j_otherP], (x_a+(x - x_otherP), z_a+(z - z_otherP)))
-                except:
-                    pass
-                screen.blit(
-                    imgs_run[i][j], (x_a, z_a))
-
                 j += nig
                 nig *= -1
         elif keyState[pygame.K_SPACE]:
@@ -666,10 +715,8 @@ while True:
                     ez1 = []
         elif keyState[pygame.K_9]:
             with open(filename, 'wb') as fi:
-                # dump your data into the file
                 pickle.dump(arr_Ash_X_Z_range, fi)
             with open('feilds.pk', 'wb') as fi:
-                # dump your data into the file
                 pickle.dump(feilds, fi)
         elif keyState[pygame.K_1]:
             Press_1 += 1
