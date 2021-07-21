@@ -326,9 +326,6 @@ def handle_messages():
                         if rc[endidx] == 'E':
                             usernames = ast.literal_eval(rc[startidx+1:endidx])
                             usernames = [n.strip() for n in usernames]
-                            for nameUs in usernames:
-                                if nameUs != username:
-                                    print(f"{nameUs} is playing")
 
                             break
                     else:
@@ -379,7 +376,7 @@ def handle_messages():
                     for i in range(0, len(rc)):
                         idxPl = 0
                         for nameU in usernames:
-                            if nameU == rc[i:i+len(nameU)]:
+                            if nameU == rc[i:i+len(nameU)] and rc[i+len(nameU):i+len(nameU)+1] == 'x':
                                 print(f"{nameU} is moving")
                                 break
                             idxPl += 1
@@ -433,8 +430,6 @@ def handle_messages():
                         zlist[idxPl] = int(z_rc)
                         ilist[idxPl] = int(i_rc)
                         jlist[idxPl] = int(j_rc)
-                        print(xlist)
-                        print(zlist)
 
                     except:
                         pass
@@ -471,24 +466,18 @@ s.send(username.encode())
 
 message_handler = threading.Thread(target=handle_messages, args=())
 message_handler.start()
-
+hit_player = False
 
 input_handler = threading.Thread(target=input_handler, args=())
 input_handler.start()
+again = False
 while True:
 
     clock.tick(game_speed)
     keyState = pygame.key.get_pressed()
-    screen.blit(bg_surface, (x, z))
-    try:
-        for player in range(0, len(usernames)):
-            screen.blit(
-                imgs_run[ilist[player]][jlist[player]], (x_a+(x - xlist[player]), z_a+(z - zlist[player])))
-    except:
-        pass
-    screen.blit(
-        imgs_run[i][j], (x_a, z_a))
-
+    if (keyState[pygame.K_x] and hit_player) or again:
+        battle()
+        again = True
     if In_Battle and not sameBattle:
         levelPokemon = random.randint(1, 10)
         caught = False
@@ -554,6 +543,25 @@ while True:
             screen.blit(imgs_run[i][j], (x_a, z_a))
             noPokeMonPic = False
     else:
+        screen.blit(bg_surface, (x, z))
+        screen.blit(
+            imgs_run[i][j], (x_a, z_a))
+
+        try:
+            for player in range(0, len(usernames)):
+                x_other_player = x_a+(x - xlist[player])
+                z_other_player = z_a+(z - zlist[player])
+                screen.blit(
+                    imgs_run[ilist[player]][jlist[player]], (x_other_player, z_other_player))
+            for player in range(0, len(usernames)):
+                x_other_player = x_a+(x - xlist[player])
+                z_other_player = z_a+(z - zlist[player])
+
+                printFont(usernames[player], FUCHSIA, 30,
+                          x_other_player + 25, z_other_player - 10)
+
+        except:
+            pass
         if not keyState[pygame.K_1]:
             Press_1 = 0
         if keyState[pygame.QUIT]:
@@ -577,6 +585,7 @@ while True:
             Hit = False
             x -= m_s
             x_a += a_s
+            hitplayer = True
             for barier in range(0, len(arr_Ash_X_Z_range)):
                 if arr_Ash_X_Z_range[barier][0] < (x_a + abs(x)) and arr_Ash_X_Z_range[barier][1] > (x_a + abs(x)) and arr_Ash_X_Z_range[barier][2] < (z_a + abs(z)) and arr_Ash_X_Z_range[barier][3] > (z_a + abs(z)):
                     Hit = True
@@ -584,6 +593,8 @@ while True:
             for player_barier in range(0, len(xlist)):
                 if abs(xlist[player_barier]) + 22 > abs(x) and abs(xlist[player_barier]) - 22 < abs(x) and abs(zlist[player_barier]) - 31 < abs(z) and abs(zlist[player_barier]) + 31 > abs(z):
                     Hit = True
+                    hit_player = True
+
                     break
             x += m_s
             x_a -= a_s
@@ -604,6 +615,7 @@ while True:
             Hit = False
             x += m_s
             x_a -= a_s
+            hitplayer = True
             for barier in range(0, len(arr_Ash_X_Z_range)):
                 if arr_Ash_X_Z_range[barier][0] < (x_a + abs(x)) and arr_Ash_X_Z_range[barier][1] > (x_a + abs(x)) and arr_Ash_X_Z_range[barier][2] < (z_a + abs(z)) and arr_Ash_X_Z_range[barier][3] > (z_a + abs(z)):
                     Hit = True
@@ -611,6 +623,8 @@ while True:
             for player_barier in range(0, len(xlist)):
                 if abs(xlist[player_barier]) + 22 > abs(x) and abs(xlist[player_barier]) - 22 < abs(x) and abs(zlist[player_barier]) - 31 < abs(z) and abs(zlist[player_barier]) + 31 > abs(z):
                     Hit = True
+                    hit_player = True
+
                     break
             x -= m_s
             x_a += a_s
@@ -629,6 +643,7 @@ while True:
             Hit = False
             z -= m_s
             z_a += a_s
+            hitplayer = True
             for barier in range(0, len(arr_Ash_X_Z_range)):
                 if arr_Ash_X_Z_range[barier][0] < (x_a + abs(x)) and arr_Ash_X_Z_range[barier][1] > (x_a + abs(x)) and arr_Ash_X_Z_range[barier][2] < (z_a + abs(z)) and arr_Ash_X_Z_range[barier][3] > (z_a + abs(z)):
                     Hit = True
@@ -636,6 +651,8 @@ while True:
             for player_barier in range(0, len(xlist)):
                 if abs(xlist[player_barier]) + 22 > abs(x) and abs(xlist[player_barier]) - 22 < abs(x) and abs(zlist[player_barier]) - 31 < abs(z) and abs(zlist[player_barier]) + 31 > abs(z):
                     Hit = True
+                    hit_player = True
+
                     break
             z += m_s
             z_a -= a_s
@@ -656,14 +673,16 @@ while True:
             Hit = False
             z += 10
             z_a -= a_s
+            hitplayer = True
             for barier in range(0, len(arr_Ash_X_Z_range)):
                 if arr_Ash_X_Z_range[barier][0] < (x_a + abs(x)) and arr_Ash_X_Z_range[barier][1] > (x_a + abs(x)) and arr_Ash_X_Z_range[barier][2] < (z_a + abs(z)) and arr_Ash_X_Z_range[barier][3] > (z_a + abs(z)):
                     Hit = True
-
                     break
             for player_barier in range(0, len(xlist)):
                 if abs(xlist[player_barier]) + 22 > abs(x) and abs(xlist[player_barier]) - 22 < abs(x) and abs(zlist[player_barier]) - 31 < abs(z) and abs(zlist[player_barier]) + 31 > abs(z):
                     Hit = True
+                    hit_player = True
+
                     break
             z -= 10
             z_a += a_s
